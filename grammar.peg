@@ -1,0 +1,361 @@
+validFile = _ versionDirective (_ (
+    variableDeclaration /
+    functionPrototype /
+    functionDefinition /
+    defineDirective
+    # TODO: structureDefinition
+))* _
+
+# Version preprocessing directive.
+versionDirective = _ sharp _ version requiredSpace intConstant (
+    requiredSpace es
+)? requiredNewline
+
+# Preprocessing macros.
+defineDirective = _ sharp _ define requiredSpace identifier
+        (_ macroArgument)?
+        (requiredSpace macroBody)?
+macroArgument = leftParenthesis _ macroArgumentList _ rightParenthesis
+macroArgumentList = identifier (_ macroArgumentListAppendix)*
+macroArgumentListAppendix = comma _ identifier
+
+# Global statements
+layoutExtension = layout _ leftParenthesis _ location _ equals _ intConstant _ rightParenthesis
+
+functionPrototype = typeSpecifier requiredSpace identifier _ leftParenthesis _ functionPrototypeParameterList _ rightParenthesis _ semicolon _
+functionPrototypeParameterListEntry = (typeQualifier requiredSpace)? typeSpecifier (requiredSpace identifier)?
+functionPrototypeParameterListAppendix = comma _ functionPrototypeParameterListEntry
+functionPrototypeParameterList = functionPrototypeParameterListEntry (_ functionPrototypeParameterListAppendix)*
+
+functionDefinition = typeSpecifier requiredSpace identifier _ leftParenthesis _ functionParameterList _ rightParenthesis _ block _ 
+functionParameterListEntry = (typeQualifier requiredSpace)? typeSpecifier requiredSpace identifier
+functionParameterListAppendix = comma _ functionParameterListEntry
+functionParameterList = (_ functionParameterListEntry (_ functionParameterListAppendix)*)? / (_ void)
+
+block = leftBrace _ blockOrStatement* _ rightBrace
+blockOrStatement = (_ (
+    whileConstruct /
+    ifConstruct /
+    forConstruct /
+    variableDeclaration /
+    returnStatement /
+    statement /
+    block
+))
+
+statement = (expression)? _ semicolon _
+
+variableDeclaration = (layoutExtension _)? (typeQualifier requiredSpace)? typeSpecifier requiredSpace statement _ 
+
+returnStatement = return requiredSpace statement
+
+# This is the infamous expression subgraph.
+# PlantUML version: //www.plantuml.com/plantuml/png/bLV1JYCx4BpdA_83_C8J2F4a3YjMcyEUpKm7Mkkn9tQRJVZw3M7KaUpKj7m2LLLNLpMEHEwpk2HbyfjD5YUqfUESA6UEONFzTNjtzzysqw5G47R-IObVCSeoYNb4N5nTplmMfZFVCtKb7-QPmiX7JT4oBLHvlCoKdCG4b22ZDiSy8YwkGYcuTDgHfq7EHC_ibQpwts9QgFBG_a09abPNC5IOrbO-ll7W_7COVCdyGI-ftwEMLFV1F28kheT2-GlyuTAVTUKGVGnOOjVKWzewIs1kq_8zJa_7Zjpz6-rhwNFjyx2JspfB0BPfwvxvXp2QAMt_6tTGjZgbDOWZOHuHbMjL0EXVMNvp9kk3i-uBUkabMcNFRbjd251JRT8pRptulZt6FVI2zcHFDgop162RDkoPXo-_nn_S0LpGdCIP48-8ohLg0FHqACwpd706w0RQQFzMQMz4hCAuWIPSqIRoJiu0-kyNUjrie4rRbRqByuYeN3NZ5SBlOVVEUy4ve2DefCs1qjowfi1Kuws9ZHatZYpyGI2BvGYxwHs0sjeCs1RM9bFnmhFdmNNDwQRccqQDAt2hXVQjLKOsRRokGQIsc1DFBfskZ3bIBQph0xQ2OKaz29W0ePVbBT4WtmOkKP1tofnDxH13bbG6YMbt-LaIcKFx4YvVS1wTzwOu_-NFJq-sAPCVlxyxnMIgIpXZFnFj-MXgXTB4mVdsecss2baSg9wqxePfx0al073WSgDj3IsphuMzSFX_-Mi-ZqZ88mNXFLD2YhsFJXw_IhiWq2QeP0cBNb8BuyBWARGeT00Vc0e53lSKnZBvVm00
+expression = sequentialExpressionRoot
+
+# Precedence 17
+sequentialExpressionRoot = assignmentExpressionRoot (_ sequentialAppendix)*
+sequentialAppendix = sequentialOperator _ assignmentExpressionRoot
+sequentialOperator = comma
+
+# Precedence 16
+assignmentExpressionRoot = ternarySelectionExpressionRoot (_ assignmentAppendix)*
+assignmentAppendix = assignmentOperator (_ ternarySelectionExpressionRoot)*
+assignmentOperator =
+    equals /
+    plusEquals /
+    minusEquals /
+    starEquals /
+    slashEquals /
+    percentEquals /
+    lessThanLessThanEquals /
+    moreThanMoreThanEquals /
+    ampersandEquals /
+    caretEquals /
+    pipeEquals
+plusEquals = plus equals
+minusEquals = minus equals
+starEquals = star equals
+slashEquals = slash equals
+percentEquals = percent equals
+lessThanLessThanEquals = lessThan lessThan equals
+moreThanMoreThanEquals = moreThan moreThan equals
+ampersandEquals = ampersand equals
+caretEquals = caret equals
+pipeEquals = pipe equals
+
+# Precedence 15
+ternarySelectionExpressionRoot = logicalInclusiveOrExpressionRoot (_ ternarySelectionAppendix)*
+ternarySelectionAppendix = questionMark _ logicalInclusiveOrExpressionRoot _ colon _ logicalInclusiveOrExpressionRoot
+
+# Precedence 14
+logicalInclusiveOrExpressionRoot = logicalExclusiveOrExpressionRoot (_ logicalInclusiveOrAppendix)*
+logicalInclusiveOrAppendix = logicalInclusiveOrOperator _ logicalExclusiveOrExpressionRoot
+logicalInclusiveOrOperator = pipe pipe
+
+# Precedence 13
+logicalExclusiveOrExpressionRoot = logicalAndExpressionRoot (_ logicalExclusiveOrAppendix)*
+logicalExclusiveOrAppendix = logicalExclusiveOrOperator _ logicalAndExpressionRoot
+logicalExclusiveOrOperator = caret caret
+
+# Precedence 12
+logicalAndExpressionRoot = bitWiseInclusiveOrExpressionRoot (_ logicalAndAppendix)*
+logicalAndAppendix = logicalAndOperator _ bitWiseInclusiveOrExpressionRoot
+logicalAndOperator = ampersand ampersand
+
+# Precedence 11
+bitWiseInclusiveOrExpressionRoot = bitWiseExclusiveOrExpressionRoot (_ bitWiseInclusiveOrAppendix)*
+bitWiseInclusiveOrAppendix = bitWiseInclusiveOrOperator _ bitWiseExclusiveOrExpressionRoot
+bitWiseInclusiveOrOperator = pipe
+
+# Precedence 10
+bitWiseExclusiveOrExpressionRoot = bitWiseAndExpressionRoot (_ bitWiseExclusiveOrAppendix)*
+bitWiseExclusiveOrAppendix = bitWiseExclusiveOrOperator _ bitWiseAndExpressionRoot
+bitWiseExclusiveOrOperator = caret
+
+# Precedence 9
+bitWiseAndExpressionRoot = equalityExpressionRoot (_ bitWiseAndAppendix)*
+bitWiseAndAppendix = bitWiseAndOperator _ equalityExpressionRoot
+bitWiseAndOperator = ampersand
+
+# Precedence 8
+equalityExpressionRoot = relationalExpressionRoot (_ equalityAppendix)*
+equalityAppendix = equalityOperator _ relationalExpressionRoot
+equalityOperator =
+    equalsEquals /
+    bangEquals
+equalsEquals = equals equals
+bangEquals = bang equals
+
+# Precedence 7
+relationalExpressionRoot = bitWiseShiftExpressionRoot (_ relationalAppendix)*
+relationalAppendix = relationalOperator _ bitWiseShiftExpressionRoot
+relationalOperator =
+    lessThanEquals /
+    lessThan /
+    moreThanEquals /
+    moreThan
+lessThanEquals = lessThan equals
+moreThanEquals = moreThan equals
+
+# Precedence 6
+bitWiseShiftExpressionRoot = additiveExpressionRoot (_ bitWiseShiftAppendix)*
+bitWiseShiftAppendix = bitWiseShiftOperator _ additiveExpressionRoot
+bitWiseShiftOperator =
+    lessThanLessThan /
+    moreThanMoreThan
+lessThanLessThan = lessThan lessThan
+moreThanMoreThan = moreThan moreThan
+
+# Precedence 5
+additiveExpressionRoot = multiplicativeExpressionRoot (_ additiveAppendix)*
+additiveAppendix = additiveOperator _ multiplicativeExpressionRoot
+additiveOperator =
+    plus /
+    minus
+
+# Precedence 4
+multiplicativeExpressionRoot = primaryExpressionRoot (_ multiplicativeAppendix)*
+multiplicativeAppendix = multiplicativeOperator _ primaryExpressionRoot
+multiplicativeOperator =
+    star /
+    slash /
+    percent
+
+# Precedence 3 and above
+primaryExpressionRoot = (
+    parenthesisExpression /
+    # constructorStructureExpression / # TODO: Find out what this does and implement
+    builtinFunctionCallExpression /
+    functionCallExpression /
+    unaryPrefixExpression /
+    terminalExpression
+) (_ primaryAppendix)*
+primaryAppendix =
+    arraySubscriptAppendix /
+    swizzleAppendix /
+    fieldSelectorAppendix /
+    unaryPostfixOperator
+
+parenthesisExpression = leftParenthesis _ expression _ rightParenthesis
+
+# TODO: Find out what this does and implement
+# constructorStructureExpression = typeSpecifier _ leftParenthesis _ expression _ rightParenthesis
+
+builtinFunctionCallExpression = builtinFunctionId _ leftParenthesis _ expression _ rightParenthesis
+
+functionCallExpression = identifier _ leftParenthesis _ expression _ rightParenthesis
+
+unaryPostfixOperator =
+    plusPlus /
+    minusMinus
+
+swizzleAppendix = dot _ swizzle
+
+fieldSelectorAppendix = dot identifier
+
+arraySubscriptAppendix = leftBracket _ expression _ rightBracket
+
+terminalExpression = builtinVariableId / identifier / floatConstant / intConstant
+
+unaryPrefixExpression = unaryPrefixOperator _ expression
+unaryPrefixOperator =
+    plusPlus /
+    minusMinus /
+    plus /
+    minus /
+    tilde /
+    bang
+
+plusPlus = plus plus
+
+minusMinus = minus minus
+
+# If/elif/else constructs
+ifConstruct = ifCase
+    (_ elseIfCase)*
+    (_ elseCase)?
+ifCase = if _ leftParenthesis _ expression _ rightParenthesis _ blockOrStatement
+elseIfCase = else requiredSpace if _ leftParenthesis _ expression _ rightParenthesis _ blockOrStatement
+elseCase = else _ blockOrStatement
+
+# For constructs
+forConstruct = for _ leftParenthesis _ (variableDeclaration / statement)  _ statement _ expression? _ rightParenthesis _ blockOrStatement
+
+# While constructs
+whileConstruct = while _ leftParenthesis _ expression _ rightParenthesis _ blockOrStatement
+
+for = 'for'
+
+if = 'if'
+
+while = 'while'
+
+else = 'else'
+
+builtinFunctionId = 
+    "radians" / "degrees" / "sin" / "cos" / "tan" / "asin" / "acos" /
+    "atan" / "sinh" / "cosh" / "tanh" / "asinh" / "acosh" / "atanh" /
+    "pow" / "exp" / "log" / "exp2" / "log2" / "sqrt" / "inversesqrt" /
+    "abs" / "sign" / "floor" / "trunc" / "round" / "roundEven" /
+    "ceil" / "fract" / "mod" / "min" / "max" / "modf" / "clamp" / "mix" /
+    "step" / "smoothstep" / "isnan" / "isinf" / "floatBitsToInt" /
+    "intBitsToFloat" / "floatBitsToUint" / "uintBitsToFloat" / "fma" /
+    "frexp" / "ldexp" / "packUnorm2x16" / "packSnorm2x16" / "packUnorm4x8" /
+    "packSnorm4x8" / "unpackUnorm2x16" / "unpackSnorm2x16" / "unpackUnorm4x8" /
+    "unpackSnorm4x8" / "packDouble2x32" / "unpackDouble2x32" / "packHalf2x16" /
+    "unpackHalf2x16" / "length" / "distance" / "dot" / "cross" / "normalize" /
+    "ftransform" / "faceforward" / "reflect" / "refract" / "matrixCompMult" /
+    "outerProduct" / "transpose" / "determinant" / "inverse" / "lessThan" /
+    "lessThanEqual" / "greaterThan" / "greaterThanEqual" / "equal" /
+    "notEqual" / "any" / "all" / "not" / "uaddCarry" / "usubBorrow" /
+    "umulExtended" / "imulExtended" / "bitfieldExtract" / "bitfieldInsert" /
+    "bitfieldReverse" / "bitCount" / "findLSB" / "findMSB" / "textureSize" /
+    "textureQueryLod" / "textureQueryLevels" / "textureSamples" / "texture" /
+    "textureProj" / "textureLod" / "textureOffset" / "texelFetch" /
+    "texelFetchOffset" / "textureProjOffset" / "textureLodOffset" /
+    "textureProjLod" / "textureProjLodOffset" / "textureGrad" / "textureGradOffset" /
+    "textureProjGrad" / "textureProjGradOffset" / "textureGather" /
+    "textureGatherOffset" / "textureGatherOffsets" / "atomicCounterIncrement" /
+    "atomicCounterDecrement" / "atomicCounter" / "atomicAdd" / "atomicMin" /
+    "atomicMax" / "atomicAnd" / "atomicOr" / "atomicXor" / "atomicExchange" /
+    "atomicCompSwap" / "imageSize" / "imageSamples" / "imageLoad" /
+    "imageStore" / "dFdx" / "dFdy" / "dFdxFine" / "dFdyFine" / "dFdxCoarse" /
+    "dFdyCoarse" / "fwidth" / "fwidthFine" / "fwidthCoarse" / "interpolateAtCentroid" /
+    "interpolateAtSample" / "interpolateAtOffset" / "noise1" / "noise2" /
+    "noise3" / "noise4"
+
+builtinVariableId = "gl_FragColor" / "gl_FragCoord" # TODO: add rest
+
+typeSpecifier = "void" / "int" / "float" / "vec2" / "vec3" / "vec4" / "uint" / "uvec2" / "uvec3" / "uvec4" / "bool" / "bvec2" / "bvec3" / "bvec4" / "ivec2" / "ivec3" / "ivec4" / "mat2" / "mat3" / "mat4" # TODO: add rest
+
+typeQualifier = 'const' / 'in' / 'out' / 'inout' / 'uniform' # TODO: add rest
+
+swizzle = ~"[xyzw]+" / ~"[rgba]+"
+
+version = "version"
+
+define = "define"
+
+layout = "layout"
+
+location = "location"
+
+return = "return"
+
+void = "void"
+
+es = "es" / "ES"
+
+identifier = ~"[a-zA-Z_]+[a-zA-Z0-9_]*"
+
+floatConstant = ~"[+-]?((\d+\.\d*)|(\d*\.\d+))(e[+-]?\d+)?"
+
+intConstant = ~"[+-]?\d+"
+
+dot = "."
+
+plus = "+"
+
+minus = "-"
+
+slash = "/"
+
+tilde = "~"
+
+ampersand = "&"
+
+questionMark = "?"
+
+caret = "^"
+
+pipe = "|"
+
+bang = "!"
+
+lessThan = "<"
+
+moreThan = ">"
+
+percent = "%"
+
+colon = ":"
+
+backslash = "\\"
+
+star = "*"
+
+sharp = "#"
+
+leftBracket = "["
+
+rightBracket = "]"
+
+leftParenthesis = "("
+
+rightParenthesis = ")"
+
+leftBrace = "{"
+
+rightBrace = "}"
+
+comma = ","
+
+equals = "="
+
+semicolon = ";"
+
+requiredSpace = ~"[ ]+"
+
+requiredNewline = ~"[\r\n]+"
+
+_ = meaninglessness*
+
+meaninglessness = ~"\s+" / multilineComment / lineComment
+
+lineComment = ~"//[^\r\n]*"
+
+multilineComment = ~"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/"
+
+# God in heaven
+macroBody = ~r"([^\\\n]*\\[\t ]*\n)*[^\n]*\n"m
