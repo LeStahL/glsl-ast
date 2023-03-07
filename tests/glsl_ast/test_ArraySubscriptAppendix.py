@@ -45,6 +45,8 @@ void main() {
     def test_GlobalDeclaration(self):
         shaderFile = TestArraySubscriptAppendix.ASTVisitorInstance.visit(grammar.parse(TestArraySubscriptAppendix.GlobalDeclaration))
 
+        print(shaderFile.toString(0))
+
         self.assertEqual(shaderFile.version, VersionDirective(450))
         
         self.assertEqual(len(shaderFile.body), 1)
@@ -54,7 +56,8 @@ void main() {
         self.assertIsNotNone(shaderFile.body[0].specifier)
         self.assertIsNotNone(shaderFile.body[0].statement)
         self.assertEqual(shaderFile.body[0].specifier, TypeSpecifier.Float)
-    
+
+        # TODO: Fix remaining subtree
     
     def test_LocalDeclaration(self):
         pass

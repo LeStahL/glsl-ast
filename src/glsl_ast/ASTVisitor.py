@@ -122,6 +122,7 @@ class ASTVisitor(NodeVisitor):
     JoinChildrenBasedRules = [
         'plusPlus',
         'minusMinus',
+        'equals',
         'plusEquals',
         'minusEquals',
         'starEquals',
@@ -154,9 +155,9 @@ class ASTVisitor(NodeVisitor):
         children = ASTVisitor.Existing(visited_children)
         if node.expr_name in ASTVisitor.StringLikeRules:
             return str(node.text)
-        elif node.expr_name in ASTVisitor.BinaryReductionBasedRules:
+        if node.expr_name in ASTVisitor.BinaryReductionBasedRules:
             return Appendix(children[0], children[1])
-        elif node.expr_name in ASTVisitor.BinaryRootBasedRules:
+        if node.expr_name in ASTVisitor.BinaryRootBasedRules:
             if len(children) == 0:
                 return None
             elif len(children) == 1:
@@ -164,15 +165,16 @@ class ASTVisitor(NodeVisitor):
             if type(children[1]) is not list:
                 children[1] = [children[1]]
             return BinaryExpression(children[0], children[1])
-        elif node.expr_name in ASTVisitor.LogicalOperatorBasedRules:
+        if node.expr_name in ASTVisitor.LogicalOperatorBasedRules:
             return LogicalOperator(node.text)
-        elif node.expr_name in ASTVisitor.BitWiseOperatorBasedRules:
+        if node.expr_name in ASTVisitor.BitWiseOperatorBasedRules:
             return BitWiseOperator(node.text)
-        elif node.expr_name in ASTVisitor.JoinChildrenBasedRules:
+        if node.expr_name in ASTVisitor.JoinChildrenBasedRules:
+            assert False
             return ''.join(children)
-        elif len(children) == 1:
+        if len(children) == 1:
             return children[0]
-        elif len(children) == 0:
+        if len(children) == 0:
             return None
         return children
     

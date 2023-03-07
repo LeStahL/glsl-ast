@@ -62,7 +62,6 @@ sequentialOperator = comma
 assignmentExpressionRoot = ternarySelectionExpressionRoot (_ assignmentAppendix)*
 assignmentAppendix = assignmentOperator (_ ternarySelectionExpressionRoot)*
 assignmentOperator =
-    equals /
     plusEquals /
     minusEquals /
     starEquals /
@@ -72,7 +71,8 @@ assignmentOperator =
     moreThanMoreThanEquals /
     ampersandEquals /
     caretEquals /
-    pipeEquals
+    pipeEquals /
+    equals
 plusEquals = plus equals
 minusEquals = minus equals
 starEquals = star equals
