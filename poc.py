@@ -730,15 +730,6 @@ class ReturnStatement:
             ('\n' + self.expression.toString(depth + 1)) if 'toString' in dir(self.expression) else ' {}\n'.format(str(self.expression)),
         )
 
-class MultiplicativeOperator(Enum):
-    Multiplication = '*'
-    Division = '/'
-    Modulo = '%'
-
-class AdditiveOperator(Enum):
-    Addition = '+'
-    Subtraction = '-'
-
 class BuiltinVariable(Enum):
     FragCoord = 'gl_FragCoord'
 

@@ -1,0 +1,23 @@
+from enum import Enum
+
+class TypeSpecifier(Enum):
+    Void = 'void'
+    Float = 'float'
+    Int = 'int'
+    Ivec2 = 'ivec2'
+    Ivec3 = 'ivec3'
+    Ivec4 = 'ivec4'
+    Uint = 'uint'
+    Uvec2 = 'uvec2'
+    Uvec3 = 'uvec3'
+    Uvec4 = 'uvec4'
+    Bool = 'bool'
+    Vec2 = 'vec2'
+    Vec3 = 'vec3'
+    Vec4 = 'vec4'
+    Bvec2 = 'bvec2'
+    Bvec3 = 'bvec3'
+    Bvec4 = 'bvec4'
+    Mat2 = 'mat2'
+    Mat3 = 'mat3'
+    Mat4 = 'mat4'
