@@ -1,5 +1,6 @@
 from glsl_ast.Expression import Expression
 from glsl_ast.Appendix import Appendix
+from glsl_ast.TypeSpecifier import TypeSpecifier
 
 from typing import Iterable
 
@@ -19,3 +20,20 @@ class BinaryExpression(Expression):
                 self.appendices,
             )),
         )
+
+    def resultType(self) -> TypeSpecifier:
+        lhsDimension = self.lhs.dimension()
+        result = self.lhs.resultType()
+
+        for appendix in self.appendices:
+            appendixDimension = appendix.rhs.dimension()
+            if appendixDimension != lhsDimension:
+                # This is only allowed if one of lhs or appendix dimension is one.
+                if lhsDimension == 1:
+                    result = appendix.rhs.resultType()
+                elif appendixDimension == 1:
+                    continue
+                else:
+                    raise ValueError("Dimension mismatch in binary operation. Don't know what to do.")
+                
+        return result

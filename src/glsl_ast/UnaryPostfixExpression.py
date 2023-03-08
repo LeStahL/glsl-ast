@@ -1,5 +1,6 @@
 from glsl_ast.UnaryPostfixOperator import UnaryPostfixOperator
 from glsl_ast.Expression import Expression
+from glsl_ast.TypeSpecifier import TypeSpecifier
 
 class UnaryPostfixExpression(Expression):
     def __init__(self,
@@ -16,3 +17,9 @@ class UnaryPostfixExpression(Expression):
             ('\n' + self.operand.toString(depth + 1)) if 'toString' in dir(self.operand) else '{}\n'.format(str(self.operand)),
             self.appendix.toString(depth + 1),
         )
+
+    def resultType(self) -> TypeSpecifier:
+        return self.operand.resultType()
+    
+    def dimension(self) -> int:
+        return self.operand.dimension()

@@ -1,7 +1,3 @@
-from sys import path
-from os.path import join, dirname
-path.append(join(dirname(__file__), '../../src'))
-
 from glsl_ast.VersionDirective import VersionDirective
 from glsl_ast.ASTVisitor import ASTVisitor
 from glsl_ast.VariableDeclaration import VariableDeclaration

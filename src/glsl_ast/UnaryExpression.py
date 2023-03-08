@@ -1,5 +1,6 @@
 from typing import Any
 from glsl_ast.Expression import Expression
+from glsl_ast.TypeSpecifier import TypeSpecifier
 
 class UnaryExpression(Expression):
     def __init__(self,
